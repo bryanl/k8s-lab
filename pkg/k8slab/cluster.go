@@ -52,10 +52,6 @@ func Delete(clusterName string) error {
 }
 
 func Shell(ctx context.Context, clusterName string, args []string) error {
-	logger := logrus.WithField("cluster-name", clusterName)
-
-	logger.Info("run shell")
-
 	kubeHome, err := kubeDir()
 	if err != nil {
 		return err
