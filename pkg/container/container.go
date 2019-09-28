@@ -5,20 +5,33 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-
-	"github.com/docker/docker/api/types/mount"
 )
 
+type Volume struct {
+	Source string
+	Target string
+}
+
+type Mount struct {
+	Source string
+	Target string
+}
+
 type Options struct {
-	Mounts []mount.Mount
-	Links  []string
+	Mounts  []Mount
+	Volumes []Volume
+	Links   []string
 }
 
 func Interactive(ctx context.Context, options Options, imageName string, args ...string) error {
 	execArgs := []string{"run", "-it", "--rm", "--net", "host"}
-	for _, m := range options.Mounts {
-		spec := fmt.Sprintf("%s:%s", m.Source, m.Target)
+	for _, v := range options.Volumes {
+		spec := fmt.Sprintf("%s:%s", v.Source, v.Target)
 		execArgs = append(execArgs, "-v", spec)
+	}
+	for _, m := range options.Mounts {
+		spec := fmt.Sprintf("source=%s,target=%s", m.Source, m.Target)
+		execArgs = append(execArgs, "--mount", spec)
 	}
 	execArgs = append(execArgs, imageName)
 	execArgs = append(execArgs, args...)

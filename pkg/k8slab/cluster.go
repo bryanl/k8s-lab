@@ -3,10 +3,10 @@ package k8slab
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/user"
 	"path/filepath"
 
-	"github.com/docker/docker/api/types/mount"
 	"github.com/sirupsen/logrus"
 	"sigs.k8s.io/kind/pkg/cluster"
 
@@ -34,6 +34,14 @@ func Init(clusterName string) error {
 		return fmt.Errorf("create cluster: %w", err)
 	}
 
+	p, err := configPath(clusterName)
+	if err != nil {
+		return fmt.Errorf("get cluster config path: %w", err)
+	}
+	if err := os.Chmod(p, 0644); err != nil {
+		return fmt.Errorf("update cluster config permissions: %w", err)
+	}
+
 	return nil
 }
 
@@ -52,32 +60,51 @@ func Delete(clusterName string) error {
 }
 
 func Shell(ctx context.Context, clusterName string, args []string) error {
-	kubeHome, err := kubeDir()
-	if err != nil {
-		return err
-	}
+	targetDir := "/home/k8slab/.kube"
+	targetConfigName := "kind-config-k8s-lab"
+	options := container.Options{}
 
-	configName := fmt.Sprintf("kind-config-%s", clusterName)
-	configPath := filepath.Join(kubeHome, configName)
-
-	targetPath := "/home/k8slab/.kube/config"
-
-	options := container.Options{
-		Mounts: []mount.Mount{
+	runningInDocker := checkFileExists("/.dockerenv")
+	if runningInDocker {
+		logrus.Info("running in docker; using k8s-lab mount")
+		options.Mounts = []container.Mount{
 			{
-				Type:   mount.TypeBind,
-				Source: configPath,
-				Target: targetPath,
+				Source: "k8s-lab",
+				Target: targetDir,
 			},
-		},
+		}
+	} else {
+		source, err := configPath(clusterName)
+		if err != nil {
+			return fmt.Errorf("get cluster config path: %w", err)
+		}
+
+		options.Volumes = []container.Volume{
+			{
+				Source: source,
+				Target: filepath.Join(targetDir, targetConfigName),
+			},
+		}
 	}
 
-	err = container.Interactive(ctx, options, "bryanl/k8slab", args...)
+	err := container.Interactive(ctx, options, "bryanl/k8s-lab", args...)
 	if err != nil {
 		return fmt.Errorf("unable to run container: %w", err)
 	}
 
 	return nil
+}
+
+func configPath(clusterName string) (string, error) {
+	dir, err := kubeDir()
+	if err != nil {
+		return "", err
+	}
+
+	configName := fmt.Sprintf("kind-config-%s", clusterName)
+	configPath := filepath.Join(dir, configName)
+
+	return configPath, nil
 }
 
 func kubeDir() (string, error) {
@@ -87,4 +114,13 @@ func kubeDir() (string, error) {
 	}
 
 	return filepath.Join(u.HomeDir, ".kube"), nil
+}
+
+func checkFileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+
+	return !info.IsDir()
 }

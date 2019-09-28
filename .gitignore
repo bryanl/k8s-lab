@@ -1,4 +1,3 @@
-### Go template
 *.exe
 *.exe~
 *.dll
@@ -8,3 +7,4 @@
 *.out
 vendor/
 .idea/
+dist/
