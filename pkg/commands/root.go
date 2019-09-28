@@ -14,8 +14,6 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "k8s-lab",
 	Short: "k8s lab/workshop tool",
-	Run: func(cmd *cobra.Command, args []string) {
-	},
 }
 
 func Execute() {
