@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"runtime"
 
 	"github.com/sirupsen/logrus"
 )
@@ -61,18 +60,14 @@ func runOctant() {
 		return
 	}
 
-	home := os.Getenv("HOME")
-	if runtime.GOOS == "windows" {
-		home = os.Getenv("USERPROFILE")
-	}
-
-	cmd := exec.Command("octant", "--kubeconfig", configFile.Name())
-	cmd.Env = []string{
-		fmt.Sprintf("HOME=%s", home),
-		fmt.Sprintf("TEMP=%s", os.Getenv("TEMP")),
+	env := os.Environ()
+	env = append(env,
 		"OCTANT_ENABLE_APPLICATIONS=1",
 		"OCTANT_DISABLE_OPEN_BROWSER=1",
-	}
+	)
+
+	cmd := exec.Command("octant", "--kubeconfig", configFile.Name())
+	cmd.Env = env
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
