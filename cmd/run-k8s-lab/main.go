@@ -63,6 +63,7 @@ func runOctant() {
 	cmd := exec.Command("octant", "--kubeconfig", configFile.Name())
 	cmd.Env = []string{
 		fmt.Sprintf("HOME=%s", os.Getenv("HOME")),
+		fmt.Sprintf("TEMP=%s", os.Getenv("TEMP")),
 		"OCTANT_ENABLE_APPLICATIONS=1",
 		"OCTANT_DISABLE_OPEN_BROWSER=1",
 	}
