@@ -22,6 +22,7 @@ func Execute() {
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(deleteCmd)
 	rootCmd.AddCommand(shellCmd)
+	rootCmd.AddCommand(configCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

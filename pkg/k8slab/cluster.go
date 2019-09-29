@@ -66,7 +66,7 @@ func Shell(ctx context.Context, clusterName string, args []string) error {
 
 	runningInDocker := checkFileExists("/.dockerenv")
 	if runningInDocker {
-		logrus.Info("running in docker; using k8s-lab mount")
+		logrus.Debug("running in docker; using k8s-lab mount")
 		options.Mounts = []container.Mount{
 			{
 				Source: "k8s-lab",
@@ -93,6 +93,13 @@ func Shell(ctx context.Context, clusterName string, args []string) error {
 	}
 
 	return nil
+}
+
+func Config(ctx context.Context, clusterName string) error {
+	args := []string{
+		"cat", ".kube/kind-config-k8s-lab",
+	}
+	return Shell(ctx, clusterName, args)
 }
 
 func configPath(clusterName string) (string, error) {
