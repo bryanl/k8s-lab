@@ -24,3 +24,6 @@ build: build-wrapper build-lab-shell
 .PHONY: push
 push: push-wrapper push-lab-shell
 
+.PHONY: release-local
+release-local:
+	 goreleaser --snapshot --skip-publish --rm-dist

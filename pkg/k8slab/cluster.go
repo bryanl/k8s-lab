@@ -3,9 +3,12 @@ package k8slab
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
+
+	"sigs.k8s.io/kind/pkg/cluster/create"
 
 	"github.com/sirupsen/logrus"
 	"sigs.k8s.io/kind/pkg/cluster"
@@ -28,9 +31,14 @@ func Init(clusterName string) error {
 
 	kindContext := cluster.NewContext(clusterName)
 
+	configFilePath, err := stageConfig()
+	if err != nil {
+		return fmt.Errorf("staging config file: %w", err)
+	}
+
 	logger.Info("init cluster")
 
-	if err := kindContext.Create(); err != nil {
+	if err := kindContext.Create(create.WithConfigFile(configFilePath)); err != nil {
 		return fmt.Errorf("create cluster: %w", err)
 	}
 
@@ -43,6 +51,23 @@ func Init(clusterName string) error {
 	}
 
 	return nil
+}
+
+func stageConfig() (string, error) {
+	f, err := ioutil.TempFile("", "kind-config.json")
+	if err != nil {
+		return "", fmt.Errorf("create temp file for kind config")
+	}
+
+	if _, err := f.WriteString(kindConfigFile); err != nil {
+		return "", err
+	}
+
+	if err := f.Close(); err != nil {
+		return "", err
+	}
+
+	return f.Name(), nil
 }
 
 func Delete(clusterName string) error {
@@ -131,3 +156,17 @@ func checkFileExists(filename string) bool {
 
 	return !info.IsDir()
 }
+
+const kindConfigFile = `
+kind: Cluster
+apiVersion: kind.sigs.k8s.io/v1alpha3
+nodes:
+- role: control-plane
+- role: worker
+  extraPortMappings:
+  - containerPort: 80
+    hostPort: 80
+    listenAddress: "0.0.0.0"
+  - containerPort: 443
+    hostPort: 443
+    listenAddress: "0.0.0.0"`
