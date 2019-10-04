@@ -8,10 +8,9 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"sigs.k8s.io/kind/pkg/cluster/create"
-
 	"github.com/sirupsen/logrus"
 	"sigs.k8s.io/kind/pkg/cluster"
+	"sigs.k8s.io/kind/pkg/cluster/create"
 
 	"github.com/bryanl/k8s-lab/pkg/container"
 )
