@@ -7,7 +7,7 @@ RUN go build -a -o /k8s-lab ./cmd/k8s-lab
 FROM ubuntu:18.04
 
 RUN apt-get update          \
- && apt-get install -y -q   \
+ && apt-get install -y -q --no-install-recommends \
       apt-transport-https   \
       ca-certificates       \
       curl                  \
@@ -16,7 +16,8 @@ RUN apt-get update          \
  && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
  && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
  && apt-get update          \
- && apt-get install -q -y docker-ce-cli
+ && apt-get install -q -y docker-ce-cli \
+ && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /k8s-lab /usr/local/bin/k8s-lab
 RUN chmod +x /usr/local/bin/k8s-lab
