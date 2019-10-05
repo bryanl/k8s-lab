@@ -9,6 +9,8 @@ import (
 	"os/exec"
 
 	"github.com/sirupsen/logrus"
+
+	"github.com/bryanl/k8s-lab/pkg/wrapper"
 )
 
 func main() {
@@ -28,6 +30,13 @@ func main() {
 }
 
 func runOctant() {
+	or := wrapper.NewOctantRunner()
+	octantBin, err := or.BinPath()
+	if err != nil {
+		logrus.WithError(err).Errorf("find octant binary")
+		return
+	}
+
 	var buf bytes.Buffer
 
 	r := newRunner()
@@ -66,7 +75,7 @@ func runOctant() {
 		"OCTANT_DISABLE_OPEN_BROWSER=1",
 	)
 
-	cmd := exec.Command("octant", "--kubeconfig", configFile.Name())
+	cmd := exec.Command(octantBin, "--kubeconfig", configFile.Name())
 	cmd.Env = env
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
@@ -75,10 +84,6 @@ func runOctant() {
 	if err := cmd.Run(); err != nil {
 		logrus.WithError(err).Errorf("running Octant")
 	}
-
-	// create container with volume mount
-	// copy kube config from volume mount
-	// run octant using kube config from volume mount
 }
 
 func run(userArgs ...string) {

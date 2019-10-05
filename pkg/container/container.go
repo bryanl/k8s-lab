@@ -24,7 +24,13 @@ type Options struct {
 }
 
 func Interactive(ctx context.Context, options Options, imageName string, args ...string) error {
-	execArgs := []string{"run", "-it", "--rm", "--net", "host"}
+	execArgs := []string{
+		"run",
+		"-it",
+		"--rm",
+		"--net", "host",
+		"--add-host", "app.local:127.0.0.1",
+	}
 	for _, v := range options.Volumes {
 		spec := fmt.Sprintf("%s:%s", v.Source, v.Target)
 		execArgs = append(execArgs, "-v", spec)
