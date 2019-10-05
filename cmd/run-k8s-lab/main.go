@@ -129,7 +129,8 @@ func (r *runner) run(userArgs ...string) error {
 		"--net", "host",
 		"-v", "//var/run/docker.sock:/var/run/docker.sock",
 		"--mount", volumeMountArg,
-		"bryanl/k8s-lab-wrapper",
+		// TODO: get this image from somewhere else
+		"bryanl/k8s-lab-wrapper:0.1.0",
 	}
 	execArgs = append(execArgs, userArgs...)
 

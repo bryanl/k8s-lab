@@ -4,7 +4,7 @@ install:
 
 .PHONY: build-wrapper
 build-wrapper:
-	@docker build -t bryanl/k8s-lab-wrapper -f Dockerfile.k8s-lab .
+	@docker build -t bryanl/k8s-lab-wrapper:0.1.0 -f Dockerfile.k8s-lab .
 
 .PHONY: push-wrapper
 push-wrapper:
@@ -12,7 +12,7 @@ push-wrapper:
 
 .PHONY: build-lab-shell
 build-lab-shell:
-	@docker build -t bryanl/k8s-lab .
+	@docker build -t bryanl/k8s-lab:0.1.0 .
 
 .PHONY: push-lab-shell
 push-lab-shell:

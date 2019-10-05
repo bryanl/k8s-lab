@@ -111,7 +111,8 @@ func Shell(ctx context.Context, clusterName string, args []string) error {
 		}
 	}
 
-	err := container.Interactive(ctx, options, "bryanl/k8s-lab", args...)
+	// TODO: get this image from somewhere else
+	err := container.Interactive(ctx, options, "bryanl/k8s-lab:0.1.0", args...)
 	if err != nil {
 		return fmt.Errorf("unable to run container: %w", err)
 	}
